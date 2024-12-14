@@ -1,7 +1,7 @@
 from datetime import datetime
+import uuid
 
 from model.dog import Dog
-from model.dog_type import DogType
 from model.timestamp import Timestamp
 
 dogs_db = {
@@ -20,32 +20,34 @@ post_db = [
 ]
 
 def create_timestamp() -> Timestamp:
-    tmp_timestamp = Timestamp(timestamp=datetime.now())
-    new_timestamp = Timestamp(id=tmp_timestamp.id,
-                 timestamp=int(round(tmp_timestamp.timestamp.timestamp())))
+    current_timestamp = datetime.now()
+    new_timestamp = Timestamp(id=uuid.uuid4().int, timestamp=int(current_timestamp.timestamp()))
+    print(new_timestamp)
     post_db.append(new_timestamp)
     return new_timestamp
 
-def get_dog_by_id(id: int):
-    return dogs_db.get(id)
+def get_dog_by_pk(pk: int):
+    return dogs_db.get(pk)
 
-def get_dogs_by_type(type: DogType):
+def get_dogs_by_kind(kind: str):
     filtered_dogs = []
     for v in dogs_db.values():
-        if v.kind == type:
+        if v.kind == kind:
             filtered_dogs.append(v)
     return filtered_dogs
 
+def list_dogs():
+    return list(dogs_db.values())
+
 def create_dog(dog: Dog):
-    if (get_dog_by_id(dog.pk) is not None):
+    if (get_dog_by_pk(dog.pk) is not None):
        return None
-    
-    dogs_db.pop(dog.pk, dog)
+    dogs_db[dog.pk] = dog
     return dog
 
-def update_dog(dog: Dog):
-    existing_dog = get_dog_by_id(dog.pk)
+def update_dog(pk: int, dog: Dog):
+    existing_dog = dogs_db.pop(pk, None)
     if (existing_dog is None):
        return None
-    dogs_db.update(dog.pk, dog)
+    dogs_db[dog.pk] = dog
     return dog
